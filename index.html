@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Harmonia - Afinador de Lira</title>
-    <!-- Metadatos para compartir en redes sociales -->
     <meta property="og:title" content="Harmonia - Afinador de Lira Griega">
     <meta property="og:description" content="Afinador interactivo, generador de música y oráculo de sonido para instrumentos antiguos.">
     
@@ -51,6 +50,11 @@
             color: var(--text-primary);
             font-family: 'Cinzel', serif;
             transition: all 0.3s ease;
+        }
+        .greek-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #e5e7eb;
         }
 
         .btn-muse {
@@ -108,6 +112,7 @@
 
         input[type=range] { accent-color: var(--accent-terracotta); }
         
+        /* Paneles */
         .settings-panel {
             background: rgba(253, 246, 227, 0.95);
             border: 2px solid var(--accent-gold);
@@ -130,6 +135,110 @@
             transform-origin: bottom center;
         }
 
+        /* Toggle Switch */
+        .toggle-container {
+            display: flex;
+            background: rgba(255,255,255,0.5);
+            border: 2px solid var(--accent-gold);
+            border-radius: 999px;
+            padding: 4px;
+            position: relative;
+            cursor: pointer;
+        }
+        .toggle-btn {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            z-index: 10;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            transition: color 0.3s;
+        }
+        .toggle-btn.active { color: #fdf6e3; }
+        .toggle-slider {
+            position: absolute;
+            top: 4px; left: 4px; bottom: 4px;
+            width: calc(50% - 4px);
+            background: var(--accent-terracotta);
+            border-radius: 999px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .toggle-container[data-state="tonoi"] .toggle-slider {
+            transform: translateX(100%);
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(255, 254, 250, 0.9);
+            border-left: 4px solid var(--accent-terracotta);
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #5c4033;
+            font-style: italic;
+            display: none; 
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Contenedor de notas en semicírculo */
+        .notes-arc-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            margin-top: 1rem;
+        }
+        .note-chip {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #4b3621;
+            color: #fdf6e3;
+            border: 2px solid #c5a059;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background-color 0.2s;
+            z-index: 10;
+        }
+        .note-chip:hover {
+            background: #b85c38;
+            transform: translate(-50%, -50%) scale(1.1);
+            z-index: 20;
+        }
+        .note-chip.active-note {
+            background: #b85c38;
+            border-color: #fdf6e3;
+            box-shadow: 0 0 10px #b85c38;
+        }
+
+        /* Modal Glosario */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 60;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            padding: 20px;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .glossary-content {
+            background: #fdf6e3;
+            border: 4px double var(--accent-gold);
+            max-width: 600px; width: 100%; max-height: 80vh;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .glossary-section { margin-bottom: 1.5rem; border-bottom: 1px dashed var(--accent-gold); padding-bottom: 1rem; }
+        .glossary-title { font-family: 'Cinzel', serif; color: var(--accent-terracotta); font-weight: bold; font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .glossary-text { font-size: 0.95rem; line-height: 1.6; color: var(--text-primary); }
+        .glossary-sub { font-weight: bold; color: var(--wood-dark); margin-top: 0.5rem; display: block; }
+
         #lyre-svg { touch-action: none; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-parchment); }
@@ -141,9 +250,15 @@
     <!-- Menú Superior -->
     <div class="fixed top-4 right-4 z-50 flex items-center gap-2 bg-white/90 p-2 rounded-lg shadow-lg border border-[#c5a059]">
         <div class="flex items-center gap-2 px-2 border-r border-[#c5a059]">
-            <svg class="w-4 h-4 text-[#4b3621]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+            <svg class="w-4 h-4 text-[#4b3621]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 01-1-1v-4a1 1 0 01-1-1v-4a1 1 0 01-1-1v-4a1 1 0 01-1-1v-4a1 1 0 01-1-1v-4a1 1 0 01-1-1v-4a1 1 0 01-1-1v-4a1 1 0 01-1-1v-4a1 1 0 01-1-1v-4z"></path></svg>
             <input type="range" min="0" max="1" step="0.1" value="0.5" class="w-16 md:w-24 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" oninput="setVolume(this.value)" title="Volumen Maestro">
         </div>
+        
+        <!-- Botón GLOSARIO (Nuevo) -->
+        <button onclick="toggleGlossary()" class="btn-icon" title="Glosario Musical">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        </button>
+
         <button id="btn-settings" onclick="toggleSettings()" class="btn-icon" title="Ajustes de Sonido">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         </button>
@@ -155,9 +270,21 @@
         </button>
     </div>
 
-    <!-- Panel de Ajustes -->
-    <div id="settings-panel" class="settings-panel hidden-panel fixed top-20 right-4 z-40 w-72 p-6 rounded-lg shadow-2xl">
+    <!-- Panel de Ajustes (Slide-over) -->
+    <div id="settings-panel" class="settings-panel hidden-panel fixed top-20 right-4 z-40 w-72 p-6 rounded-lg shadow-2xl overflow-y-auto max-h-[80vh]">
         <h3 class="text-center font-bold text-[#b85c38] uppercase border-b border-[#c5a059] pb-2 mb-4">Ajustes del Luthier</h3>
+        
+        <div class="mb-4 bg-[#e6dcb8] p-2 rounded">
+            <label class="block text-xs font-bold uppercase mb-1 text-[#4b3621]">Afinación Base (A4)</label>
+            <select id="base-freq" class="greek-input w-full p-1 text-sm rounded cursor-pointer" onchange="updateBaseFreq(this.value)">
+                <option value="440" selected>440 Hz (Moderno Estándar)</option>
+                <option value="432">432 Hz (Pitagoórico / Natural)</option>
+                <option value="415">415 Hz (Barroco / Antiguo)</option>
+                <option value="444">444 Hz (Brillante)</option>
+                <option value="392">392 Hz (Francés Antiguo)</option>
+            </select>
+        </div>
+
         <div class="mb-4">
             <label class="block text-xs font-bold uppercase mb-1 text-[#4b3621]">Presets</label>
             <select id="preset-select" class="greek-input w-full p-1 text-sm rounded" onchange="applyPreset(this.value)">
@@ -171,9 +298,9 @@
         <div class="mb-4">
             <label class="block text-xs font-bold uppercase mb-1 text-[#4b3621]">Onda</label>
             <select id="wave-type" class="greek-input w-full p-1 text-sm rounded" onchange="updateAudioParams('waveType', this.value)">
-                <option value="triangle" selected>Triangular</option>
-                <option value="sawtooth">Diente de Sierra</option>
-                <option value="square">Cuadrada</option>
+                <option value="triangle" selected>Triangular (Sintetizado)</option>
+                <option value="sawtooth">Diente de Sierra (Rico)</option>
+                <option value="square">Cuadrada (Nasal)</option>
             </select>
         </div>
         <div class="space-y-4">
@@ -184,8 +311,48 @@
         </div>
     </div>
 
+    <!-- Modal Glosario (Nuevo) -->
+    <div id="glossary-overlay" class="modal-overlay">
+        <div class="glossary-content rounded-lg">
+            <button onclick="toggleGlossary()" class="absolute top-4 right-4 text-[#4b3621] hover:text-[#b85c38]">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-3xl text-center cinzel-font text-[#b85c38] mb-6 border-b-2 border-[#c5a059] pb-2">Glosario de Harmonia</h2>
+            
+            <div class="glossary-section">
+                <h4 class="glossary-title">1. Los Géneros (Genera)</h4>
+                <p class="glossary-text">Los griegos dividían sus escalas (tetracordios) en tres "colores" o estilos básicos:</p>
+                <span class="glossary-sub">■ Diatónico (El Natural)</span>
+                <p class="glossary-text">Es el sistema estándar que usamos hoy (Do-Re-Mi...). Se basa en Tonos y Semitonos. Suena noble, natural y viril.</p>
+                <span class="glossary-sub">■ Cromático (El Colorido)</span>
+                <p class="glossary-text">Introduce saltos de semitono consecutivos. Esto "tiñe" la música con un carácter más patético, dulce o quejumbroso.</p>
+                <span class="glossary-sub">■ Enharmónico (El Refinado)</span>
+                <p class="glossary-text">Considerado el más avanzado y perfecto por los antiguos. Divide el semitono en dos <strong>microtonos</strong> (cuartos de tono). Suena exótico y "desafinado" para el oído moderno, pero era muy apreciado por su sutileza.</p>
+            </div>
+
+            <div class="glossary-section">
+                <h4 class="glossary-title">2. Modos vs. Tonoi</h4>
+                <span class="glossary-sub">■ Modos (Harmoniai)</span>
+                <p class="glossary-text">Son como las "escalas" modernas (Mayor, Menor...). Definen la <strong>distancia entre las notas</strong>. Cambiar de modo cambia el "sentimiento" (triste, alegre, tenso).</p>
+                <span class="glossary-sub">■ Tonoi (Claves de Transposición)</span>
+                <p class="glossary-text">No cambian la estructura de la escala, sino su <strong>altura absoluta</strong>. Imagina un cantante con voz grave (Hipodórico) frente a una soprano (Hiperfrigio). El "Tonos" ajusta la tensión general de todas las cuerdas para adaptarse al registro.</p>
+            </div>
+
+            <div class="glossary-section" style="border:none">
+                <h4 class="glossary-title">3. El Ethos</h4>
+                <p class="glossary-text">Para los griegos, la música no era solo sonido, sino una fuerza que afectaba al alma. Cada armonía tenía un "ethos" o carácter moral:</p>
+                <ul class="list-disc pl-5 mt-2 glossary-text text-sm">
+                    <li><strong>Dórico:</strong> Valiente, educativo y templado.</li>
+                    <li><strong>Frigio:</strong> Extático, entusiasta y religioso.</li>
+                    <li><strong>Lidio:</strong> Doliente, íntimo o relajado.</li>
+                    <li><strong>Mixolidio:</strong> Trágico y lamentoso.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <!-- UI Principal -->
-    <main id="app-container" class="temple-border bg-white/90 backdrop-blur-sm max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 lg:p-10 relative overflow-hidden transition-all duration-500 pb-24">
+    <main id="app-container" class="temple-border bg-white/90 backdrop-blur-sm max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 lg:p-10 relative overflow-hidden transition-all duration-500 pb-32">
         <div class="absolute top-0 left-4 w-4 h-full border-x-2 border-dotted border-yellow-700/20 opacity-50 pointer-events-none"></div>
         <div class="absolute top-0 right-4 w-4 h-full border-x-2 border-dotted border-yellow-700/20 opacity-50 pointer-events-none"></div>
 
@@ -194,9 +361,31 @@
             <header class="text-center border-b-2 border-[#c5a059] pb-4">
                 <h1 class="text-4xl lg:text-5xl font-bold text-[#b85c38] tracking-widest uppercase mb-2">Harmonia</h1>
                 <p class="text-lg italic text-[#4b3621]">Afinador de Cítaras y Liras Antiguas</p>
+                <p class="text-xs text-gray-500 mt-1">Usa teclado (A-S-D-F...) o ratón para tocar</p>
             </header>
 
             <div class="space-y-4">
+                
+                <!-- Selector de Sistema -->
+                <div class="mb-2">
+                    <label class="block text-sm font-bold mb-2 text-[#4b3621] uppercase tracking-wider text-center">Sistema de Afinación</label>
+                    <div class="toggle-container" id="system-toggle" onclick="toggleSystem()" data-state="modes">
+                        <div class="toggle-slider"></div>
+                        <div class="toggle-btn active" id="btn-mode-system">Modos (Escalas)</div>
+                        <div class="toggle-btn" id="btn-tonoi-system">Tonoi (Claves)</div>
+                    </div>
+                </div>
+
+                <!-- Selector de Género (NUEVO) -->
+                <div>
+                    <label class="block text-sm font-bold mb-1 text-[#4b3621] uppercase tracking-wider">Género (Genus)</label>
+                    <select id="genus" onchange="updateTuning()" class="greek-input w-full p-2 rounded text-lg cursor-pointer">
+                        <option value="diatonic">Diatónico (Estándar)</option>
+                        <option value="chromatic">Cromático (Colorido)</option>
+                        <option value="enharmonic">Enharmónico (Microtonal)</option>
+                    </select>
+                </div>
+
                 <div>
                     <label class="block text-sm font-bold mb-1 text-[#4b3621] uppercase tracking-wider">Cuerdas</label>
                     <div class="flex items-center gap-4">
@@ -205,9 +394,10 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-bold mb-1 text-[#4b3621] uppercase tracking-wider">Modo Griego</label>
-                    <select id="mode" onchange="updateTuning()" class="greek-input w-full p-2 rounded text-lg cursor-pointer">
+                <!-- Control de Modos (Visible en Sistema Modos) -->
+                <div id="modes-control">
+                    <label class="block text-sm font-bold mb-1 text-[#4b3621] uppercase tracking-wider">Modo (Harmonia)</label>
+                    <select id="mode" onchange="updateMode(this.value)" class="greek-input w-full p-2 rounded text-lg cursor-pointer">
                         <option value="ionian">Jónico (Alegre / Heroico)</option>
                         <option value="dorian" selected>Dórico (Serio / Guerrero)</option>
                         <option value="phrygian">Frigio (Místico / Extático)</option>
@@ -218,8 +408,33 @@
                     </select>
                 </div>
 
-                <div class="bg-[#e6dcb8]/50 p-3 rounded border border-[#c5a059]">
-                    <label class="block text-sm font-bold mb-1 text-[#4b3621] uppercase text-center">Transposición</label>
+                <!-- Control de Tonoi (Visible en Sistema Tonoi) -->
+                <div id="tonoi-control" style="display: none;">
+                    <label class="block text-sm font-bold mb-1 text-[#4b3621] uppercase tracking-wider">Tonos (Aristóxeno)</label>
+                    <select id="tonos-select" onchange="updateTuning()" class="greek-input w-full p-2 rounded text-lg cursor-pointer">
+                        <option value="-5">Hipodórico (Muy Grave)</option>
+                        <option value="-4">Hipoiastio</option>
+                        <option value="-3">Hipofrigio</option>
+                        <option value="-2">Hipoeólico</option>
+                        <option value="-1">Hipolidio</option>
+                        <option value="0" selected>Dórico (Base / Central)</option>
+                        <option value="1">Iastio</option>
+                        <option value="2">Frigio</option>
+                        <option value="3">Eólico</option>
+                        <option value="4">Lidio</option>
+                        <option value="5">Hiperdorian / Mixolidio</option>
+                        <option value="6">Hiperiastio</option>
+                        <option value="7">Hiperfrigio (Muy Agudo)</option>
+                    </select>
+                </div>
+
+                <!-- INFO BOX (Educativo) -->
+                <div id="info-box" class="info-box">
+                    <span id="info-text">El modo Dórico es considerado por Platón y Aristóteles como el único capaz de inspirar valentía y templanza. Es el modo griego por excelencia.</span>
+                </div>
+
+                <div class="bg-[#e6dcb8]/50 p-3 rounded border border-[#c5a059]" id="transpose-box">
+                    <label class="block text-sm font-bold mb-1 text-[#4b3621] uppercase text-center">Transposición Manual</label>
                     <div class="flex items-center justify-between gap-2">
                         <button onclick="changeTranspose(-1)" class="greek-input w-10 h-10 hover:bg-[#b85c38] hover:text-white font-bold text-xl rounded">-</button>
                         <div class="text-center">
@@ -266,9 +481,10 @@
                 </svg>
             </div>
 
-            <div class="w-full bg-[#fffefae0] border border-[#c5a059] rounded p-4">
-                <h3 class="text-center text-sm uppercase font-bold text-[#b85c38] mb-3 border-b border-[#e6dcb8] pb-2">Notas Requeridas</h3>
-                <div id="tuning-display" class="flex flex-wrap justify-center gap-2 max-h-[150px] overflow-y-auto"></div>
+            <!-- Contenedor Notas en Arco -->
+            <div class="w-full relative z-0">
+                <h3 class="text-center text-sm uppercase font-bold text-[#b85c38] mb-1">Notas Requeridas</h3>
+                <div id="tuning-display" class="notes-arc-container"></div>
             </div>
         </div>
     </main>
@@ -295,10 +511,66 @@
     <script>
         const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         const MODES = { ionian: [0, 2, 4, 5, 7, 9, 11], dorian: [0, 2, 3, 5, 7, 9, 10], phrygian: [0, 1, 3, 5, 7, 8, 10], lydian: [0, 2, 4, 6, 7, 9, 11], mixolydian: [0, 2, 4, 5, 7, 9, 10], aeolian: [0, 2, 3, 5, 7, 8, 10], locrian: [0, 1, 3, 5, 6, 8, 10] };
-        const PRESETS = { 'default': { waveType: 'triangle', attack: 0.02, decay: 2.0, brightness: 4, reverb: 0.3 }, 'harp': { waveType: 'triangle', attack: 0.05, decay: 4.0, brightness: 2, reverb: 0.6 }, 'warrior': { waveType: 'sawtooth', attack: 0.01, decay: 1.5, brightness: 8, reverb: 0.2 }, 'dream': { waveType: 'triangle', attack: 0.1, decay: 5.0, brightness: 3, reverb: 0.8 } };
+        
+        const GENERA_INTERVALS = {
+            'chromatic': [0, 1, 2, 5, 7, 8, 9], // Semitono-Semitono-3ra Menor
+            'enharmonic': [0, 0.5, 1, 5, 7, 7.5, 8] // Cuarto-Cuarto-3ra Mayor
+        };
+
+        const LORE = {
+            'dorian': "Dórico: Viril, majestuoso y severo. Platón lo consideraba el único modo capaz de inspirar valentía y templanza.",
+            'phrygian': "Frigio: Entusiasta, báquico y emocional. Aristóteles decía que purgaba las pasiones. Asociado al éxtasis.",
+            'lydian': "Lidio: Suave, doliente y adecuado para lamentos. Algunos lo consideraban demasiado relajado para la educación.",
+            'mixolydian': "Mixolidio: Patético y trágico. Usado en el teatro para expresar grandes emociones y lamentos profundos.",
+            'ionian': "Jónico (Iasitio): Agradable, pero considerado muelle y afeminado por los conservadores espartanos. Brillante.",
+            'aeolian': "Eólico: Tranquilo y melancólico, con un carácter antiguo y sencillo.",
+            'locrian': "Locrio: Inestable y extraño, raramente usado en su forma pura en la antigüedad.",
+            'seikilos': "Epitafio de Seikilos (s. I d.C.): La melodía completa más antigua del mundo. 'Mientras vivas, brilla...'",
+            'orestes': "Estásimo de Orestes: Fragmento de Eurípides (408 a.C.). Uso del género cromático para expresar la locura de Orestes.",
+            'apollo': "Peán a Apolo: Himno sagrado encontrado en Delfos. Escrito en ritmo de 5 tiempos (Peónico), solemne y ritual."
+        };
+
+        const TONOI_LORE = {
+            '-5': "Hipodórico: El tono más grave. Profundo, resonante y solemne. La base de la escala.",
+            '-4': "Hipoiastio: Ligeramente más agudo que el hipodórico, carácter serio pero menos pesado.",
+            '-3': "Hipofrigio: Tono grave medio. Práctico para acompañamiento de voz masculina.",
+            '-2': "Hipoeólico: Tono de transición hacia el registro central.",
+            '-1': "Hipolidio: Tono previo al central, usado a menudo en ditirambos.",
+            '0': "Dórico: EL TONO CENTRAL. Equilibrio perfecto. La referencia para todos los demás tonos.",
+            '1': "Iastio: Brillante y claro, comienza a entrar en el registro agudo.",
+            '2': "Frigio: Tono agudo, excitado y enérgico.",
+            '3': "Eólico: Tono alto, usado para efectos dramáticos.",
+            '4': "Lidio: Tono muy agudo y penetrante, a menudo para lamentos femeninos.",
+            '5': "Hiperdorian / Mixolidio: Agudo extremo, tenso y lastimero.",
+            '6': "Hiperiastio: Registro muy alto, rara vez usado en cítara estándar.",
+            '7': "Hiperfrigio: El límite agudo del sistema perfecto."
+        };
+
+        const PRESETS = { 
+            'default': { waveType: 'triangle', attack: 0.02, decay: 2.0, brightness: 4, reverb: 0.3 }, 
+            'harp': { waveType: 'triangle', attack: 0.05, decay: 4.0, brightness: 2, reverb: 0.6 }, 
+            'warrior': { waveType: 'sawtooth', attack: 0.01, decay: 1.5, brightness: 8, reverb: 0.2 }, 
+            'dream': { waveType: 'triangle', attack: 0.1, decay: 5.0, brightness: 3, reverb: 0.8 }
+        };
         const SONGS = { 'seikilos': { mode: 'mixolydian', strings: 7, notes: [{s:2, d:600}, {s:6, d:800}, {s:6, d:400}, {s:4, d:400}, {s:5, d:400}, {s:6, d:800}, {s:5, d:400}, {s:4, d:400}, {s:3, d:400}, {s:2, d:1200}, {s:1, d:400}, {s:2, d:400}, {s:3, d:800}, {s:4, d:400}, {s:3, d:400}, {s:2, d:400}, {s:1, d:800}, {s:0, d:400}, {s:1, d:400}, {s:2, d:1200}] }, 'orestes': { mode: 'phrygian', strings: 7, notes: [{s:6, d:300}, {s:5, d:300}, {s:4, d:600}, {s:2, d:300}, {s:5, d:300}, {s:4, d:200}, {s:3, d:200}, {s:4, d:200}, {s:3, d:600}, {s:1, d:800}, {s:3, d:400}, {s:0, d:1200}] }, 'apollo': { mode: 'dorian', strings: 7, notes: [{s:2, d:600}, {s:2, d:400}, {s:4, d:600}, {s:3, d:400}, {s:5, d:600}, {s:4, d:400}, {s:6, d:600}, {s:5, d:400}, {s:4, d:400}, {s:3, d:400}, {s:2, d:400}, {s:1, d:400}, {s:0, d:1200}] } };
 
-        let state = { strings: 7, mode: 'dorian', transpose: 0, isPlaying: false, isSongPlaying: false, isTunerActive: false, freqs: [], tempoFactor: 0.5, volume: 0.5, audioParams: { ...PRESETS['default'] } };
+        const KEY_MAP = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ñ', 'z', 'x', 'c', 'v', 'b'];
+
+        let state = { 
+            strings: 7, 
+            mode: 'dorian', 
+            tuningSystem: 'modes', 
+            genus: 'diatonic', // Nuevo estado
+            transpose: 0, 
+            baseFreq: 440, 
+            isPlaying: false, 
+            isSongPlaying: false, 
+            isTunerActive: false, 
+            freqs: [], 
+            tempoFactor: 0.5, 
+            volume: 0.5, 
+            audioParams: { ...PRESETS['default'] } 
+        };
         let audioCtx = null, masterGain = null, reverbNode = null, sequencerId = null, isMouseDown = false, analyser = null, microphoneStream = null, tunerRafId = null;
         let tunerDataArray = new Float32Array(2048);
 
@@ -308,210 +580,210 @@
             document.addEventListener('mouseup', () => isMouseDown = false);
             const lyreContainer = document.getElementById('lyre-container');
             lyreContainer.addEventListener('touchmove', handleTouchStrum, { passive: false });
+            document.addEventListener('keydown', handleKeyDown);
         });
 
-        // --- FUNCIONES DE DIBUJO (Esenciales para que se vea la Lira) ---
-        function drawLyre(num) {
-            const svg = document.getElementById('lyre-svg');
-            svg.innerHTML = '';
+        function handleKeyDown(e) {
+            if (e.repeat) return;
+            const key = e.key.toLowerCase();
+            const index = KEY_MAP.indexOf(key);
+            if (index !== -1 && index < state.strings) playTone(state.freqs[index], index);
+        }
 
-            const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-            defs.innerHTML = `
-                <linearGradient id="woodGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" style="stop-color:#5c4033;stop-opacity:1" />
-                    <stop offset="50%" style="stop-color:#8b5a2b;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#5c4033;stop-opacity:1" />
-                </linearGradient>
-                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#b8860b;stop-opacity:1" />
-                </linearGradient>
-                <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="3" dy="3" stdDeviation="3" flood-opacity="0.5"/>
-                </filter>
-            `;
-            svg.appendChild(defs);
+        function toggleSystem() {
+            const container = document.getElementById('system-toggle');
+            const modesControl = document.getElementById('modes-control');
+            const tonoiControl = document.getElementById('tonoi-control');
+            const transposeBox = document.getElementById('transpose-box');
+            const btnModes = document.getElementById('btn-mode-system');
+            const btnTonoi = document.getElementById('btn-tonoi-system');
 
-            // Cuerpo
-            const body = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            body.setAttribute("d", "M 60 120 Q 40 360 150 390 Q 260 360 240 120 L 220 120 Q 230 320 150 340 Q 70 320 80 120 Z");
-            body.setAttribute("fill", "url(#woodGrad)");
-            body.setAttribute("stroke", "#3e2723");
-            body.setAttribute("stroke-width", "3");
-            body.setAttribute("filter", "url(#shadow)");
-            svg.appendChild(body);
+            if (state.tuningSystem === 'modes') {
+                state.tuningSystem = 'tonoi';
+                container.dataset.state = 'tonoi';
+                modesControl.style.display = 'none';
+                tonoiControl.style.display = 'block';
+                transposeBox.style.opacity = '0.5';
+                transposeBox.style.pointerEvents = 'none';
+                btnModes.classList.remove('active');
+                btnTonoi.classList.add('active');
+            } else {
+                state.tuningSystem = 'modes';
+                container.dataset.state = 'modes';
+                modesControl.style.display = 'block';
+                tonoiControl.style.display = 'none';
+                transposeBox.style.opacity = '1';
+                transposeBox.style.pointerEvents = 'auto';
+                state.transpose = 0; 
+                btnModes.classList.add('active');
+                btnTonoi.classList.remove('active');
+            }
+            updateTuning();
+        }
 
-            // Brazos y puente
-            const leftArm = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            leftArm.setAttribute("d", "M 60 120 Q 50 60 30 50 L 50 50 Q 70 60 80 120 Z");
-            leftArm.setAttribute("fill", "url(#woodGrad)");
-            svg.appendChild(leftArm);
-            const rightArm = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            rightArm.setAttribute("d", "M 240 120 Q 250 60 270 50 L 250 50 Q 230 60 220 120 Z");
-            rightArm.setAttribute("fill", "url(#woodGrad)");
-            svg.appendChild(rightArm);
-            const yoke = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            yoke.setAttribute("x", "25"); yoke.setAttribute("y", "45"); yoke.setAttribute("width", "250"); yoke.setAttribute("height", "20"); yoke.setAttribute("rx", "5");
-            yoke.setAttribute("fill", "url(#woodGrad)"); yoke.setAttribute("stroke", "#3e2723");
-            svg.appendChild(yoke);
-            const decor = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            decor.setAttribute("cx", "150"); decor.setAttribute("cy", "55"); decor.setAttribute("r", "6"); decor.setAttribute("fill", "url(#goldGrad)");
-            svg.appendChild(decor);
-            const bridge = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            bridge.setAttribute("x", "100"); bridge.setAttribute("y", "350"); bridge.setAttribute("width", "100"); bridge.setAttribute("height", "10"); bridge.setAttribute("fill", "#2d1b10");
-            svg.appendChild(bridge);
+        function updateMode(val) {
+            updateInfoText(val);
+            updateTuning();
+        }
 
-            // Cuerdas
-            const topY = 65, bottomY = 350, topWidth = 160, bottomWidth = 80, topStartX = 150 - (topWidth/2), bottomStartX = 150 - (bottomWidth/2);
-
-            for (let i = 0; i < num; i++) {
-                const t = num > 1 ? i / (num - 1) : 0.5;
-                const x1 = topStartX + (topWidth * t);
-                const x2 = bottomStartX + (bottomWidth * t);
-                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-
-                const lineVisual = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                lineVisual.setAttribute("x1", x1); lineVisual.setAttribute("y1", topY); lineVisual.setAttribute("x2", x2); lineVisual.setAttribute("y2", bottomY);
-                lineVisual.setAttribute("class", "string-line"); lineVisual.setAttribute("stroke", "#d4b483"); lineVisual.setAttribute("stroke-width", "1.5"); lineVisual.setAttribute("id", `str-${i}`);
-                
-                const lineHit = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                lineHit.setAttribute("x1", x1); lineHit.setAttribute("y1", topY); lineHit.setAttribute("x2", x2); lineHit.setAttribute("y2", bottomY);
-                lineHit.setAttribute("class", "string-hitbox"); lineHit.setAttribute("id", `hit-${i}`);
-                lineHit.addEventListener('mousedown', () => playTone(state.freqs[i], i));
-                lineHit.addEventListener('mouseenter', () => { if (isMouseDown) playTone(state.freqs[i], i); });
-
-                g.appendChild(lineVisual); g.appendChild(lineHit); svg.appendChild(g);
-                const peg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                peg.setAttribute("cx", x1); peg.setAttribute("cy", topY - 5); peg.setAttribute("r", "2.5"); peg.setAttribute("fill", "#000"); svg.appendChild(peg);
+        function updateInfoText(key, textOverride = null) {
+            const box = document.getElementById('info-box');
+            const text = document.getElementById('info-text');
+            let content = textOverride || LORE[key] || TONOI_LORE[key];
+            if (content) {
+                text.innerText = content;
+                box.style.display = 'block';
+                box.style.animation = 'none';
+                box.offsetHeight;
+                box.style.animation = 'fadeIn 0.5s';
+            } else {
+                box.style.display = 'none';
             }
         }
 
-        // --- LÓGICA PRINCIPAL ---
+        function updateBaseFreq(val) {
+            state.baseFreq = parseInt(val);
+            updateTuning();
+        }
+
+        // --- GLOSARIO LOGIC ---
+        function toggleGlossary() {
+            const overlay = document.getElementById('glossary-overlay');
+            if (overlay.classList.contains('open')) {
+                overlay.classList.remove('open');
+            } else {
+                overlay.classList.add('open');
+            }
+        }
+
+        function drawLyre(num) {
+            const svg = document.getElementById('lyre-svg');
+            svg.innerHTML = '';
+            const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+            defs.innerHTML = `<linearGradient id="woodGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#5c4033;stop-opacity:1" /><stop offset="50%" style="stop-color:#8b5a2b;stop-opacity:1" /><stop offset="100%" style="stop-color:#5c4033;stop-opacity:1" /></linearGradient><linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" /><stop offset="100%" style="stop-color:#b8860b;stop-opacity:1" /></linearGradient><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="3" dy="3" stdDeviation="3" flood-opacity="0.5"/></filter>`;
+            svg.appendChild(defs);
+            const body = document.createElementNS("http://www.w3.org/2000/svg", "path"); body.setAttribute("d", "M 60 120 Q 40 360 150 390 Q 260 360 240 120 L 220 120 Q 230 320 150 340 Q 70 320 80 120 Z"); body.setAttribute("fill", "url(#woodGrad)"); body.setAttribute("stroke", "#3e2723"); body.setAttribute("stroke-width", "3"); body.setAttribute("filter", "url(#shadow)"); svg.appendChild(body);
+            const leftArm = document.createElementNS("http://www.w3.org/2000/svg", "path"); leftArm.setAttribute("d", "M 60 120 Q 50 60 30 50 L 50 50 Q 70 60 80 120 Z"); leftArm.setAttribute("fill", "url(#woodGrad)"); svg.appendChild(leftArm);
+            const rightArm = document.createElementNS("http://www.w3.org/2000/svg", "path"); rightArm.setAttribute("d", "M 240 120 Q 250 60 270 50 L 250 50 Q 230 60 220 120 Z"); rightArm.setAttribute("fill", "url(#woodGrad)"); svg.appendChild(rightArm);
+            const yoke = document.createElementNS("http://www.w3.org/2000/svg", "rect"); yoke.setAttribute("x", "25"); yoke.setAttribute("y", "45"); yoke.setAttribute("width", "250"); yoke.setAttribute("height", "20"); yoke.setAttribute("rx", "5"); yoke.setAttribute("fill", "url(#woodGrad)"); yoke.setAttribute("stroke", "#3e2723"); svg.appendChild(yoke);
+            const decor = document.createElementNS("http://www.w3.org/2000/svg", "circle"); decor.setAttribute("cx", "150"); decor.setAttribute("cy", "55"); decor.setAttribute("r", "6"); decor.setAttribute("fill", "url(#goldGrad)"); svg.appendChild(decor);
+            const bridge = document.createElementNS("http://www.w3.org/2000/svg", "rect"); bridge.setAttribute("x", "100"); bridge.setAttribute("y", "350"); bridge.setAttribute("width", "100"); bridge.setAttribute("height", "10"); bridge.setAttribute("fill", "#2d1b10"); svg.appendChild(bridge);
+            const topY = 65, bottomY = 350, topWidth = 160, bottomWidth = 80, topStartX = 150 - (topWidth/2), bottomStartX = 150 - (bottomWidth/2);
+            for (let i = 0; i < num; i++) {
+                const t = num > 1 ? i / (num - 1) : 0.5; const x1 = topStartX + (topWidth * t); const x2 = bottomStartX + (bottomWidth * t);
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                const lineVisual = document.createElementNS("http://www.w3.org/2000/svg", "line"); lineVisual.setAttribute("x1", x1); lineVisual.setAttribute("y1", topY); lineVisual.setAttribute("x2", x2); lineVisual.setAttribute("y2", bottomY); lineVisual.setAttribute("class", "string-line"); lineVisual.setAttribute("stroke", "#d4b483"); lineVisual.setAttribute("stroke-width", "1.5"); lineVisual.setAttribute("id", `str-${i}`);
+                const lineHit = document.createElementNS("http://www.w3.org/2000/svg", "line"); lineHit.setAttribute("x1", x1); lineHit.setAttribute("y1", topY); lineHit.setAttribute("x2", x2); lineHit.setAttribute("y2", bottomY); lineHit.setAttribute("class", "string-hitbox"); lineHit.setAttribute("id", `hit-${i}`);
+                lineHit.addEventListener('mousedown', () => playTone(state.freqs[i], i)); lineHit.addEventListener('mouseenter', () => { if (isMouseDown) playTone(state.freqs[i], i); });
+                g.appendChild(lineVisual); g.appendChild(lineHit); svg.appendChild(g);
+                const peg = document.createElementNS("http://www.w3.org/2000/svg", "circle"); peg.setAttribute("cx", x1); peg.setAttribute("cy", topY - 5); peg.setAttribute("r", "2.5"); peg.setAttribute("fill", "#000"); svg.appendChild(peg);
+                if (i < KEY_MAP.length) {
+                    const textKey = document.createElementNS("http://www.w3.org/2000/svg", "text"); textKey.setAttribute("x", x1); textKey.setAttribute("y", bottomY + 20); textKey.setAttribute("text-anchor", "middle"); textKey.setAttribute("fill", "#b85c38"); textKey.setAttribute("font-size", "10"); textKey.setAttribute("font-family", "Cinzel"); textKey.textContent = KEY_MAP[i].toUpperCase(); svg.appendChild(textKey);
+                }
+            }
+        }
+
         function updateTuning() {
-            state.mode = document.getElementById('mode').value;
-            const rootNoteName = getNoteName(state.transpose);
-            document.getElementById('root-note').innerText = `${rootNoteName}`;
-            document.getElementById('transpose-val').innerText = `Semitonos: ${state.transpose > 0 ? '+' : ''}${state.transpose}`;
+            state.genus = document.getElementById('genus').value; // Actualizar género
+
+            if (state.tuningSystem === 'tonoi') {
+                state.mode = 'dorian'; 
+                const tonosSelect = document.getElementById('tonos-select');
+                const tonosVal = parseInt(tonosSelect.value);
+                state.transpose = tonosVal; 
+                document.getElementById('transpose-val').innerText = `Tonos Offset: ${tonosVal > 0 ? '+' : ''}${tonosVal}`;
+                const rootNoteName = getNoteName(state.transpose);
+                document.getElementById('root-note').innerText = `${rootNoteName}`;
+                updateInfoText(tonosVal.toString());
+            } else {
+                state.mode = document.getElementById('mode').value;
+                const rootNoteName = getNoteName(state.transpose);
+                document.getElementById('root-note').innerText = `${rootNoteName}`;
+                document.getElementById('transpose-val').innerText = `Semitonos: ${state.transpose > 0 ? '+' : ''}${state.transpose}`;
+                updateInfoText(state.mode);
+            }
             const data = calculateScale();
             state.freqs = data.freqs;
             const container = document.getElementById('tuning-display');
             container.innerHTML = '';
+            
+            const numStrings = data.notes.length;
+            const radius = 140; 
+            
             data.notes.forEach((n, idx) => {
                 const tag = document.createElement('div');
-                tag.className = "flex flex-col items-center bg-[#4b3621] text-[#fdf6e3] px-3 py-1 rounded shadow-md border border-[#c5a059]";
-                tag.innerHTML = `<span class="font-bold text-lg cinzel-font">${n.name}${n.octave}</span><span class="text-[0.6rem] opacity-80 font-mono">${Math.round(n.freq)}Hz</span><span class="text-[0.6rem] text-[#c5a059]">Cda ${idx+1}</span>`;
+                tag.className = "note-chip";
+                const size = numStrings > 10 ? 40 : 50; 
+                tag.style.width = size + 'px';
+                tag.style.height = size + 'px';
+                tag.style.fontSize = numStrings > 10 ? '0.7rem' : '0.9rem';
+
+                const percent = idx / (numStrings - 1);
+                const x = 50 + (percent - 0.5) * 80;
+                const x_norm = (percent - 0.5) * 2;
+                const curvature = 1 - (x_norm * x_norm);
+                const top = 10 + (curvature * 60);
+                
+                tag.style.left = x + '%';
+                tag.style.top = top + '%';
+
+                // Display especial para microtonos
+                let displayName = n.name + n.octave;
+                if (n.isMicro) {
+                    displayName += n.isMicro === 0.5 ? '<span style="font-size:0.6em; vertical-align:super">𝄲</span>' : ''; // Símbolo aproximado de cuarto de tono
+                }
+
+                tag.innerHTML = `
+                    <span class="font-bold cinzel-font">${displayName}</span>
+                    <span class="text-[0.6rem] opacity-80 font-mono hidden sm:block">${Math.round(n.freq)}</span>
+                    <span class="text-[0.6rem] text-[#c5a059] absolute -bottom-3">${KEY_MAP[idx] ? KEY_MAP[idx].toUpperCase() : idx+1}</span>
+                `;
                 tag.onclick = () => playTone(n.freq, idx);
-                tag.style.cursor = 'pointer';
                 container.appendChild(tag);
             });
             drawLyre(state.strings);
         }
 
-        // --- AUDIO Y AFINADOR ---
         async function toggleTuner() {
             const panel = document.getElementById('tuner-overlay');
             const btn = document.getElementById('btn-tuner');
+            const appContainer = document.getElementById('app-container');
             if (state.isTunerActive) {
-                state.isTunerActive = false;
-                panel.classList.add('hidden-tuner');
-                btn.classList.remove('active');
-                if (tunerRafId) cancelAnimationFrame(tunerRafId);
-                resetStringVisuals();
+                state.isTunerActive = false; panel.classList.add('hidden-tuner'); btn.classList.remove('active'); appContainer.classList.remove('pb-64'); appContainer.classList.add('pb-32'); if (tunerRafId) cancelAnimationFrame(tunerRafId); resetStringVisuals();
             } else {
-                if (state.isPlaying) toggleMusic();
-                initAudio();
+                if (state.isPlaying) toggleMusic(); initAudio();
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    microphoneStream = audioCtx.createMediaStreamSource(stream);
-                    analyser = audioCtx.createAnalyser();
-                    analyser.fftSize = 2048;
-                    microphoneStream.connect(analyser);
-                    state.isTunerActive = true;
-                    panel.classList.remove('hidden-tuner');
-                    btn.classList.add('active');
-                    updatePitch();
-                } catch (err) {
-                    alert("No se pudo acceder al micrófono.");
-                }
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); microphoneStream = audioCtx.createMediaStreamSource(stream); analyser = audioCtx.createAnalyser(); analyser.fftSize = 2048; microphoneStream.connect(analyser); state.isTunerActive = true; panel.classList.remove('hidden-tuner'); btn.classList.add('active'); appContainer.classList.remove('pb-32'); appContainer.classList.add('pb-64'); setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 300); updatePitch();
+                } catch (err) { alert("No se pudo acceder al micrófono."); }
             }
         }
 
         function autoCorrelate(buf, sampleRate) {
-            let SIZE = buf.length;
-            let rms = 0;
-            for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
-            rms = Math.sqrt(rms / SIZE);
-            if (rms < 0.01) return -1;
-            let r1 = 0, r2 = SIZE - 1, thres = 0.2;
-            for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buf[i]) < thres) { r1 = i; break; }
-            for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
-            buf = buf.slice(r1, r2);
-            SIZE = buf.length;
-            let c = new Array(SIZE).fill(0);
-            for (let i = 0; i < SIZE; i++) for (let j = 0; j < SIZE - i; j++) c[i] = c[i] + buf[j] * buf[j + i];
-            let d = 0; while (c[d] > c[d + 1]) d++;
-            let maxval = -1, maxpos = -1;
-            for (let i = d; i < SIZE; i++) if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
-            let T0 = maxpos;
-            return sampleRate / T0;
+            let SIZE = buf.length, rms = 0; for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i]; rms = Math.sqrt(rms / SIZE); if (rms < 0.01) return -1;
+            let r1 = 0, r2 = SIZE - 1, thres = 0.2; for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buf[i]) < thres) { r1 = i; break; } for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; } buf = buf.slice(r1, r2); SIZE = buf.length; let c = new Array(SIZE).fill(0); for (let i = 0; i < SIZE; i++) for (let j = 0; j < SIZE - i; j++) c[i] = c[i] + buf[j] * buf[j + i];
+            let d = 0; while (c[d] > c[d + 1]) d++; let maxval = -1, maxpos = -1; for (let i = d; i < SIZE; i++) if (c[i] > maxval) { maxval = c[i]; maxpos = i; } let T0 = maxpos; return sampleRate / T0;
         }
 
         function updatePitch() {
-            if (!state.isTunerActive) return;
-            analyser.getFloatTimeDomainData(tunerDataArray);
-            const ac = autoCorrelate(tunerDataArray, audioCtx.sampleRate);
-            const noteEl = document.getElementById('tuner-note');
-            const hzEl = document.getElementById('tuner-hz');
-            const needleEl = document.getElementById('tuner-needle');
-            const feedbackEl = document.getElementById('tuner-feedback');
-            resetStringVisuals();
-
-            if (ac === -1) { tunerRafId = requestAnimationFrame(updatePitch); return; }
-            const pitch = ac;
-            hzEl.innerText = Math.round(pitch) + " Hz";
-            let closestStringIndex = -1, minDiff = Infinity;
-            state.freqs.forEach((freq, idx) => { const diff = Math.abs(freq - pitch); if (diff < minDiff) { minDiff = diff; closestStringIndex = idx; } });
-
+            if (!state.isTunerActive) return; analyser.getFloatTimeDomainData(tunerDataArray); const ac = autoCorrelate(tunerDataArray, audioCtx.sampleRate); const noteEl = document.getElementById('tuner-note'); const hzEl = document.getElementById('tuner-hz'); const needleEl = document.getElementById('tuner-needle'); const feedbackEl = document.getElementById('tuner-feedback'); resetStringVisuals();
+            if (ac === -1) { tunerRafId = requestAnimationFrame(updatePitch); return; } const pitch = ac; hzEl.innerText = Math.round(pitch) + " Hz"; let closestStringIndex = -1, minDiff = Infinity; state.freqs.forEach((freq, idx) => { const diff = Math.abs(freq - pitch); if (diff < minDiff) { minDiff = diff; closestStringIndex = idx; } });
             if (closestStringIndex !== -1) {
-                const targetFreq = state.freqs[closestStringIndex];
-                const noteNum = 12 * (Math.log(pitch / 440) / Math.log(2)) + 69;
-                noteEl.innerText = NOTES[Math.round(noteNum) % 12];
-                const cents = 1200 * Math.log2(pitch / targetFreq);
-                let angle = cents; if (angle > 45) angle = 45; if (angle < -45) angle = -45;
-                needleEl.style.transform = `translateX(-50%) rotate(${angle}deg)`;
-                const strEl = document.getElementById(`str-${closestStringIndex}`);
-                if (Math.abs(cents) < 10) { feedbackEl.innerText = "¡AFINADA!"; feedbackEl.style.color = "#10b981"; needleEl.style.backgroundColor = "#10b981"; if(strEl) strEl.classList.add('string-tuning-good'); }
-                else if (cents < 0) { feedbackEl.innerText = "Bajo: Tensa"; feedbackEl.style.color = "#3b82f6"; needleEl.style.backgroundColor = "#3b82f6"; if(strEl) strEl.classList.add('string-tuning-flat'); }
-                else { feedbackEl.innerText = "Alto: Afloja"; feedbackEl.style.color = "#ef4444"; needleEl.style.backgroundColor = "#ef4444"; if(strEl) strEl.classList.add('string-tuning-sharp'); }
-            }
-            tunerRafId = requestAnimationFrame(updatePitch);
+                const targetFreq = state.freqs[closestStringIndex]; const noteNum = 12 * (Math.log(pitch / state.baseFreq) / Math.log(2)) + 69; const noteName = NOTES[Math.round(noteNum) % 12]; noteEl.innerText = noteName; const cents = 1200 * Math.log2(pitch / targetFreq); let angle = cents; if (angle > 45) angle = 45; if (angle < -45) angle = -45; needleEl.style.transform = `translateX(-50%) rotate(${angle}deg)`; const strEl = document.getElementById(`str-${closestStringIndex}`);
+                const noteChips = document.querySelectorAll('.note-chip');
+                if (noteChips[closestStringIndex]) noteChips[closestStringIndex].classList.add('active-note');
+                if (Math.abs(cents) < 10) { feedbackEl.innerText = "¡AFINADA!"; feedbackEl.style.color = "#10b981"; needleEl.style.backgroundColor = "#10b981"; if(strEl) strEl.classList.add('string-tuning-good'); } else if (cents < 0) { feedbackEl.innerText = "Bajo: Tensa"; feedbackEl.style.color = "#3b82f6"; needleEl.style.backgroundColor = "#3b82f6"; if(strEl) strEl.classList.add('string-tuning-flat'); } else { feedbackEl.innerText = "Alto: Afloja"; feedbackEl.style.color = "#ef4444"; needleEl.style.backgroundColor = "#ef4444"; if(strEl) strEl.classList.add('string-tuning-sharp'); }
+            } else { document.querySelectorAll('.note-chip').forEach(c => c.classList.remove('active-note')); } tunerRafId = requestAnimationFrame(updatePitch);
         }
 
-        function resetStringVisuals() { document.querySelectorAll('.string-line').forEach(s => s.classList.remove('string-tuning-flat', 'string-tuning-sharp', 'string-tuning-good')); }
+        function resetStringVisuals() { document.querySelectorAll('.string-line').forEach(s => s.classList.remove('string-tuning-flat', 'string-tuning-sharp', 'string-tuning-good')); document.querySelectorAll('.note-chip').forEach(c => c.classList.remove('active-note')); }
 
-        // --- AUDIO ENGINE ---
         function createReverbBuffer(duration) {
-            const sampleRate = audioCtx.sampleRate;
-            const length = sampleRate * duration;
-            const impulse = audioCtx.createBuffer(2, length, sampleRate);
-            for (let channel = 0; channel < 2; channel++) {
-                const impulseData = impulse.getChannelData(channel);
-                for (let i = 0; i < length; i++) impulseData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
-            }
-            return impulse;
+            const sampleRate = audioCtx.sampleRate; const length = sampleRate * duration; const impulse = audioCtx.createBuffer(2, length, sampleRate);
+            for (let channel = 0; channel < 2; channel++) { const impulseData = impulse.getChannelData(channel); for (let i = 0; i < length; i++) impulseData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2); } return impulse;
         }
 
         function initAudio() {
-            if (!audioCtx) {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                audioCtx = new AudioContext();
-                masterGain = audioCtx.createGain();
-                masterGain.gain.value = state.volume;
-                reverbNode = audioCtx.createConvolver();
-                reverbNode.buffer = createReverbBuffer(3.0); 
-                masterGain.connect(audioCtx.destination);
-                reverbNode.connect(audioCtx.destination);
-            }
+            if (!audioCtx) { const AudioContext = window.AudioContext || window.webkitAudioContext; audioCtx = new AudioContext(); masterGain = audioCtx.createGain(); masterGain.gain.value = state.volume; reverbNode = audioCtx.createConvolver(); reverbNode.buffer = createReverbBuffer(3.0); masterGain.connect(audioCtx.destination); reverbNode.connect(audioCtx.destination); }
             if (audioCtx.state === 'suspended') audioCtx.resume();
         }
 
@@ -519,58 +791,102 @@
             initAudio();
             const now = audioCtx.currentTime;
             const { waveType, attack, decay, brightness, reverb } = state.audioParams;
-            const osc = audioCtx.createOscillator(); osc.type = waveType; osc.frequency.setValueAtTime(freq, now);
-            const filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.Q.value = 0.5;
-            filter.frequency.setValueAtTime(freq * brightness, now); filter.frequency.exponentialRampToValueAtTime(freq, now + (decay * 0.15));
-            const noteGain = audioCtx.createGain(); noteGain.gain.setValueAtTime(0, now);
-            noteGain.gain.linearRampToValueAtTime(0.4, now + attack); noteGain.gain.exponentialRampToValueAtTime(0.001, now + decay);
-            const reverbSend = audioCtx.createGain(); reverbSend.gain.value = reverb;
-            osc.connect(filter); filter.connect(noteGain); noteGain.connect(masterGain); noteGain.connect(reverbSend); reverbSend.connect(reverbNode);
-            osc.start(now); osc.stop(now + decay + 0.5);
+            
+            const osc = audioCtx.createOscillator(); 
+            osc.type = waveType; 
+            osc.frequency.setValueAtTime(freq, now);
+
+            const filter = audioCtx.createBiquadFilter(); 
+            filter.type = 'lowpass'; 
+            filter.Q.value = 0.5;
+            filter.frequency.setValueAtTime(freq * brightness, now); 
+            filter.frequency.exponentialRampToValueAtTime(freq, now + (decay * 0.15));
+
+            const noteGain = audioCtx.createGain(); 
+            noteGain.gain.setValueAtTime(0, now);
+            noteGain.gain.linearRampToValueAtTime(0.4, now + attack); 
+            noteGain.gain.exponentialRampToValueAtTime(0.001, now + decay);
+
+            const reverbSend = audioCtx.createGain(); 
+            reverbSend.gain.value = reverb;
+
+            osc.connect(filter); 
+            filter.connect(noteGain); 
+            noteGain.connect(masterGain); 
+            noteGain.connect(reverbSend); 
+            reverbSend.connect(reverbNode);
+            
+            osc.start(now); 
+            osc.stop(now + decay + 0.5);
+
             const strEl = document.getElementById(`str-${strIndex}`);
-            if (strEl) { strEl.classList.remove('string-active'); strEl.getBoundingClientRect(); strEl.classList.add('string-active'); }
+            if (strEl) { 
+                strEl.classList.remove('string-active'); 
+                strEl.getBoundingClientRect(); 
+                strEl.classList.add('string-active'); 
+            }
+            
+            const noteChips = document.querySelectorAll('.note-chip');
+            if (noteChips[strIndex]) {
+                noteChips[strIndex].style.transform = "translate(-50%, -50%) scale(1.3)";
+                noteChips[strIndex].style.backgroundColor = "#b85c38";
+                setTimeout(() => {
+                    noteChips[strIndex].style.transform = "translate(-50%, -50%) scale(1)";
+                    noteChips[strIndex].style.backgroundColor = "#4b3621";
+                }, 200);
+            }
         }
 
-        // --- HELPERS ---
-        function toggleSettings() {
-            const panel = document.getElementById('settings-panel');
-            const btn = document.getElementById('btn-settings');
-            if (panel.classList.contains('hidden-panel')) { panel.classList.remove('hidden-panel'); panel.style.display = 'block'; btn.classList.add('active'); }
-            else { panel.classList.add('hidden-panel'); setTimeout(() => panel.style.display = 'none', 300); btn.classList.remove('active'); }
-        }
-        function applyPreset(name) {
-            if (name === 'custom') return;
-            const p = PRESETS[name]; state.audioParams = { ...p };
-            document.getElementById('wave-type').value = p.waveType; document.getElementById('slider-attack').value = p.attack;
-            document.getElementById('slider-decay').value = p.decay; document.getElementById('slider-brightness').value = p.brightness;
-            document.getElementById('slider-reverb').value = p.reverb;
-            document.getElementById('val-reverb').innerText = Math.round(p.reverb * 100) + '%'; document.getElementById('val-attack').innerText = p.attack + 's';
-            document.getElementById('val-decay').innerText = p.decay + 's'; document.getElementById('val-brightness').innerText = p.brightness + 'x';
-        }
-        function updateAudioParams(param, value) {
-            document.getElementById('preset-select').value = 'custom';
-            if (param === 'waveType') state.audioParams.waveType = value; else state.audioParams[param] = parseFloat(value);
-            if (param === 'attack') document.getElementById('val-attack').innerText = value + 's';
-            if (param === 'decay') document.getElementById('val-decay').innerText = value + 's';
-            if (param === 'brightness') document.getElementById('val-brightness').innerText = value + 'x';
-            if (param === 'reverb') document.getElementById('val-reverb').innerText = Math.round(value * 100) + '%';
-        }
+        function toggleSettings() { const panel = document.getElementById('settings-panel'); const btn = document.getElementById('btn-settings'); if (panel.classList.contains('hidden-panel')) { panel.classList.remove('hidden-panel'); panel.style.display = 'block'; btn.classList.add('active'); } else { panel.classList.add('hidden-panel'); setTimeout(() => panel.style.display = 'none', 300); btn.classList.remove('active'); } }
+        function applyPreset(name) { if (name === 'custom') return; const p = PRESETS[name]; state.audioParams = { ...p }; document.getElementById('wave-type').value = p.waveType; document.getElementById('slider-attack').value = p.attack; document.getElementById('slider-decay').value = p.decay; document.getElementById('slider-brightness').value = p.brightness; document.getElementById('slider-reverb').value = p.reverb; document.getElementById('val-reverb').innerText = Math.round(p.reverb * 100) + '%'; document.getElementById('val-attack').innerText = p.attack + 's'; document.getElementById('val-decay').innerText = p.decay + 's'; document.getElementById('val-brightness').innerText = p.brightness + 'x'; }
+        function updateAudioParams(param, value) { document.getElementById('preset-select').value = 'custom'; if (param === 'waveType') state.audioParams.waveType = value; else state.audioParams[param] = parseFloat(value); if (param === 'attack') document.getElementById('val-attack').innerText = value + 's'; if (param === 'decay') document.getElementById('val-decay').innerText = value + 's'; if (param === 'brightness') document.getElementById('val-brightness').innerText = value + 'x'; if (param === 'reverb') document.getElementById('val-reverb').innerText = Math.round(value * 100) + '%'; }
         function updateStringsDisplay(val) { document.getElementById('strings-val').innerText = val; state.strings = parseInt(val); updateTuning(); }
         function changeTranspose(delta) { state.transpose += delta; updateTuning(); }
         function updateTempo(val) { state.tempoFactor = val / 100; if(state.isPlaying && !state.isSongPlaying) { clearTimeout(sequencerId); startProceduralMusic(); } }
         function setVolume(val) { state.volume = parseFloat(val); if (masterGain) masterGain.gain.setValueAtTime(state.volume, audioCtx.currentTime); }
         function toggleFullScreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(e => console.log(e)); } else { if (document.exitFullscreen) document.exitFullscreen(); } }
         function getNoteName(index) { const normalized = ((index % 12) + 12) % 12; return NOTES[normalized]; }
-        function calculateScale() {
-            const modeIntervals = MODES[state.mode]; let notes = []; let freqs = []; let startMidi = 60 + state.transpose; if (state.strings > 10) startMidi -= 12;
-            for (let i = 0; i < state.strings; i++) {
-                const octaveOffset = Math.floor(i / 7); const scaleIndex = i % 7; const semitonesFromRoot = modeIntervals[scaleIndex]; const noteMidi = startMidi + (octaveOffset * 12) + semitonesFromRoot; const freq = 440 * Math.pow(2, (noteMidi - 69) / 12);
-                notes.push({ name: getNoteName(noteMidi), octave: Math.floor(noteMidi / 12) - 1, freq: freq, midi: noteMidi }); freqs.push(freq);
-            } return { notes, freqs };
+        
+        function calculateScale() { 
+            const modeIntervals = MODES[state.mode]; 
+            let notes = []; 
+            let freqs = []; 
+            let startMidi = 60 + state.transpose; 
+            if (state.strings > 10) startMidi -= 12; 
+            
+            for (let i = 0; i < state.strings; i++) { 
+                const octaveOffset = Math.floor(i / 7); 
+                const scaleIndex = i % 7; 
+                let semitonesFromRoot = modeIntervals[scaleIndex]; 
+                let isMicro = 0;
+
+                // APLICAR GÉNERO
+                if (state.genus === 'chromatic' && GENERA_INTERVALS.chromatic[scaleIndex] !== undefined) {
+                    semitonesFromRoot = GENERA_INTERVALS.chromatic[scaleIndex];
+                } else if (state.genus === 'enharmonic' && GENERA_INTERVALS.enharmonic[scaleIndex] !== undefined) {
+                    semitonesFromRoot = GENERA_INTERVALS.enharmonic[scaleIndex];
+                    if (!Number.isInteger(semitonesFromRoot)) isMicro = 0.5;
+                }
+
+                const noteMidi = startMidi + (octaveOffset * 12) + semitonesFromRoot; 
+                // La fórmula baseFreq * 2^((midi-69)/12) funciona perfectamente con flotantes para microtonos
+                const freq = state.baseFreq * Math.pow(2, (noteMidi - 69) / 12); 
+                
+                notes.push({ 
+                    name: getNoteName(Math.floor(noteMidi)), // Nombre base sin microtono
+                    octave: Math.floor(noteMidi / 12) - 1, 
+                    freq: freq, 
+                    midi: noteMidi,
+                    isMicro: isMicro
+                }); 
+                freqs.push(freq); 
+            } 
+            return { notes, freqs }; 
         }
+
         function handleTouchStrum(e) { e.preventDefault(); const touch = e.touches[0]; const element = document.elementFromPoint(touch.clientX, touch.clientY); if (element && element.classList.contains('string-hitbox')) { const id = element.id; const index = parseInt(id.split('-')[1]); if (element.dataset.lastTouched !== "true") { playTone(state.freqs[index], index); document.querySelectorAll('.string-hitbox').forEach(el => el.dataset.lastTouched = "false"); element.dataset.lastTouched = "true"; setTimeout(() => element.dataset.lastTouched = "false", 200); } } }
-        function toggleMusic() { clearTimeout(sequencerId); if (state.isSongPlaying) { state.isSongPlaying = false; document.getElementById('song-select').value = ""; } const btn = document.getElementById('play-btn'); if (state.isPlaying) { state.isPlaying = false; btn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg><span>Invocar a las Musas</span>`; btn.classList.remove('playing'); } else { if (state.isTunerActive) toggleTuner(); initAudio(); state.isPlaying = true; btn.innerHTML = `<svg class="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg><span>Detener Música</span>`; btn.classList.add('playing'); startProceduralMusic(); } }
-        function playSong(songKey) { clearTimeout(sequencerId); if (!songKey) return; if (state.isTunerActive) toggleTuner(); initAudio(); state.isSongPlaying = true; state.isPlaying = true; const btn = document.getElementById('play-btn'); btn.innerHTML = `<svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg><span>Interpretando Obra...</span>`; if (!btn.classList.contains('playing')) btn.classList.add('playing'); const song = SONGS[songKey]; document.getElementById('strings-range').value = song.strings; updateStringsDisplay(song.strings); document.getElementById('mode').value = song.mode; updateTuning(); let noteIndex = 0; const playNextNote = () => { if (!state.isSongPlaying) return; if (noteIndex >= song.notes.length) { noteIndex = 0; sequencerId = setTimeout(playNextNote, 2000); return; } const n = song.notes[noteIndex]; if (n.s < state.freqs.length) playTone(state.freqs[n.s], n.s); noteIndex++; sequencerId = setTimeout(playNextNote, n.d); }; playNextNote(); }
+        function toggleMusic() { clearTimeout(sequencerId); if (state.isSongPlaying) { state.isSongPlaying = false; document.getElementById('song-select').value = ""; updateInfoText(""); } const btn = document.getElementById('play-btn'); if (state.isPlaying) { state.isPlaying = false; btn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg><span>Invocar a las Musas</span>`; btn.classList.remove('playing'); } else { if (state.isTunerActive) toggleTuner(); initAudio(); state.isPlaying = true; btn.innerHTML = `<svg class="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg><span>Detener Música</span>`; btn.classList.add('playing'); startProceduralMusic(); } }
+        function playSong(songKey) { clearTimeout(sequencerId); if (!songKey) { updateInfoText(""); return; } if (state.isTunerActive) toggleTuner(); initAudio(); state.isSongPlaying = true; state.isPlaying = true; updateInfoText(songKey); const btn = document.getElementById('play-btn'); btn.innerHTML = `<svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg><span>Interpretando Obra...</span>`; if (!btn.classList.contains('playing')) btn.classList.add('playing'); const song = SONGS[songKey]; document.getElementById('strings-range').value = song.strings; updateStringsDisplay(song.strings); document.getElementById('mode').value = song.mode; updateMode(song.mode); let noteIndex = 0; const playNextNote = () => { if (!state.isSongPlaying) return; if (noteIndex >= song.notes.length) { noteIndex = 0; sequencerId = setTimeout(playNextNote, 2000); return; } const n = song.notes[noteIndex]; if (n.s < state.freqs.length) playTone(state.freqs[n.s], n.s); noteIndex++; sequencerId = setTimeout(playNextNote, n.d); }; playNextNote(); }
         function startProceduralMusic() { let currentIndex = Math.floor(state.strings / 2); const playNext = () => { if (!state.isPlaying || state.isSongPlaying) return; const numStrings = state.strings; const move = Math.random(); let nextIndex; if (move < 0.4) nextIndex = currentIndex + (Math.random() > 0.5 ? 1 : -1); else if (move < 0.7) nextIndex = currentIndex + (Math.random() > 0.5 ? 2 : -2); else if (move < 0.9) nextIndex = currentIndex; else nextIndex = Math.floor(Math.random() * numStrings); if (nextIndex < 0) nextIndex = 0; if (nextIndex >= numStrings) nextIndex = numStrings - 1; currentIndex = nextIndex; playTone(state.freqs[currentIndex], currentIndex); if (Math.random() > 0.75 && (currentIndex + 2) < numStrings) { setTimeout(() => { if(state.isPlaying && !state.isSongPlaying) playTone(state.freqs[currentIndex + 2], currentIndex + 2); }, 50); } const delayBase = 1200 - (state.tempoFactor * 1050); const randomVar = Math.random() * 200; sequencerId = setTimeout(playNext, delayBase + randomVar); }; playNext(); }
     </script>
 </body>
