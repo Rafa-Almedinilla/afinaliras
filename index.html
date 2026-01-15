@@ -735,7 +735,7 @@
 
                 tag.innerHTML = `
                     <span class="font-bold cinzel-font">${displayName}</span>
-                    <span class="text-[0.6rem] opacity-80 font-mono hidden sm:block">${Math.round(n.freq)}</span>
+                    <span class="text-[0.6rem] opacity-80 font-mono block">${Math.round(n.freq)}</span>
                     <span class="text-[0.6rem] text-[#c5a059] absolute -bottom-3">${KEY_MAP[idx] ? KEY_MAP[idx].toUpperCase() : idx+1}</span>
                 `;
                 tag.onclick = () => playTone(n.freq, idx);
